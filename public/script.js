@@ -1,4 +1,4 @@
- // Mobile menu toggle
+// Mobile menu toggle
         const hamburger = document.querySelector('.hamburger');
         const navLinks = document.querySelector('.nav-links');
 
@@ -63,7 +63,7 @@
         };
         document.addEventListener('click', playMusic);
 
-        // Contact form AJAX submit (alert version)
+        // Contact form AJAX submit (with external API and error handling)
         document.getElementById("contactForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -74,14 +74,23 @@
                 message: e.target.message.value,
             };
 
-            const res = await fetch("/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+            try {
+                const res = await fetch("https://portfolio-express-cqeveuuj-kenmas-projects.vercel.app/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                });
 
-            const data = await res.json();
-            alert(data.msg);
+                const data = await res.json();
 
-            e.target.reset();
+                if (res.ok) {
+                    alert(data.msg);
+                } else {
+                    throw new Error(data.msg || 'Something went wrong');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                e.target.reset();
+            }
         });
