@@ -84,13 +84,12 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    alert(data.msg);
+                    alert(data.message || "✅ Message sent!");
+                    e.target.reset();
                 } else {
-                    throw new Error(data.msg || 'Something went wrong');
+                    alert("❌ Failed: " + (data.error || "Server error"));
                 }
-            } catch (error) {
-                alert('Error: ' + error.message);
-            } finally {
-                e.target.reset();
+            } catch (err) {
+                alert("❌ Network error: " + err.message);
             }
         });
