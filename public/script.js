@@ -75,7 +75,7 @@
             };
 
             try {
-                const res = await fetch("https://portfolio-express-cqeveuuj-kenmas-projects.vercel.app/contact", {
+                const res = await fetch("/contact", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(formData),
