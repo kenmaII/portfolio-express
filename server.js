@@ -14,6 +14,21 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Basic diagnostics for MONGO_URI (no credentials)
+const parseMongoUri = (uri) => {
+  try {
+    const match = uri.match(/^mongodb\+srv:\/\/[^@]+@([^/]+)\/(.*?)\?/);
+    if (!match) return { host: "unknown", db: "unknown" };
+    const host = match[1];
+    const db = match[2] || "";
+    return { host, db };
+  } catch {
+    return { host: "unknown", db: "unknown" };
+  }
+};
+const mongoDiag = parseMongoUri(process.env.MONGO_URI || "");
+console.log("ℹ️ Using Mongo host:", mongoDiag.host, "db:", mongoDiag.db || "<none>");
+
 // MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -110,6 +125,8 @@ app.get("/health", (req, res) => {
     ok: true,
     db: dbState,
     mail: mailTransporterReady ? "ready" : "not_ready",
+    mongo: { host: mongoDiag.host, db: mongoDiag.db || "<none>" },
+    readyState: mongoose.connection.readyState,
   });
 });
 
