@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const Contact = require("./models/contact");
 const nodemailer = require("nodemailer");
 
 const app = express();
@@ -23,14 +24,13 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Error:", err));
 
-const contactSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  subject: String,
-  message: String,
-  date: { type: Date, default: Date.now },
-});
-const Contact = mongoose.model("Contact", contactSchema);
+// Extra Mongo connection event logs
+const mongoConn = mongoose.connection;
+mongoConn.on("connected", () => console.log("ℹ️ Mongo event: connected"));
+mongoConn.on("disconnected", () => console.log("ℹ️ Mongo event: disconnected"));
+mongoConn.on("error", (e) => console.error("ℹ️ Mongo event: error", e));
+
+// Contact model is loaded from ./models/contact
 
 // Nodemailer setup (Gmail SMTP)
 const transporter = nodemailer.createTransport({
@@ -44,11 +44,13 @@ const transporter = nodemailer.createTransport({
 });
 
 // Verify transporter once at boot to surface auth/network issues early
+let mailTransporterReady = false;
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Mail transporter error:", error);
   } else {
     console.log("✅ Mail transporter ready");
+    mailTransporterReady = true;
   }
 });
 
@@ -85,6 +87,22 @@ Message: ${message}
     console.error("❌ Error handling contact:", err);
     res.status(500).json({ success: false, msg: "Server error" });
   }
+});
+
+// Healthcheck endpoint for quick diagnostics
+app.get("/health", (req, res) => {
+  const mongoStates = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting",
+  };
+  const dbState = mongoStates[mongoose.connection.readyState] || "unknown";
+  res.json({
+    ok: true,
+    db: dbState,
+    mail: mailTransporterReady ? "ready" : "not_ready",
+  });
 });
 
 app.listen(PORT, () => {
