@@ -19,7 +19,7 @@ mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 30000,
   })
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Error:", err));
@@ -57,6 +57,14 @@ transporter.verify((error, success) => {
 // Routes
 app.post("/contact", async (req, res) => {
   try {
+    // Return early if DB is not connected to avoid buffering timeouts
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        msg: "Database not connected. Please try again shortly.",
+      });
+    }
+
     const { name, email, subject, message } = req.body;
 
     // 1. Simpan ke database
