@@ -588,6 +588,38 @@ document.addEventListener('DOMContentLoaded', () => {
     portfolioItems.forEach(item => {
         item.addEventListener('touchstart', addHapticFeedback);
     });
+    
+    // Create mobile dark-mode toggle inside mobile nav-links for small screens
+    const createMobileDarkToggle = () => {
+        const navLinks = document.querySelector('.nav-links');
+        if (!navLinks) return;
+
+        // Avoid duplicate
+        if (document.querySelector('.dark-mode-toggle-mobile')) return;
+
+        const mobileToggle = document.createElement('div');
+        mobileToggle.className = 'dark-mode-toggle-mobile';
+        mobileToggle.textContent = body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+
+        mobileToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            mobileToggle.classList.toggle('active', isDark);
+            mobileToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+        });
+
+        // Reflect initial state
+        if (body.classList.contains('dark-mode')) mobileToggle.classList.add('active');
+
+        navLinks.appendChild(mobileToggle);
+    };
+
+    // Run creation on load and also when nav toggles open (so it's present)
+    createMobileDarkToggle();
+    if (hamburger) {
+        hamburger.addEventListener('click', () => setTimeout(createMobileDarkToggle, 120));
+    }
 });
 
 // Contact form AJAX submit (with external API and error handling)

@@ -1070,6 +1070,16 @@
             background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
         }
 
+        /* Keep text readable when an element has a yellow background in dark mode */
+        body.dark-mode .tag,
+        body.dark-mode .tag * {
+            color: var(--dark-outline) !important;
+        }
+        body.dark-mode .tag {
+            background: var(--primary-yellow) !important;
+            border-color: var(--dark-outline) !important;
+        }
+
         /* Loading animation */
         .loading {
             position: fixed;
