@@ -22,6 +22,12 @@
             color: var(--text-dark);
             line-height: 1.6;
             position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ensure loading screen doesn't interfere with page content */
+        body.loading-active {
+            overflow: hidden;
         }
 
         body::before {
@@ -538,6 +544,11 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            /* Hide dark mode toggle on mobile */
+            .dark-mode-toggle {
+                display: none;
+            }
+
             .hamburger {
                 display: block;
                 z-index: 101;
@@ -548,6 +559,9 @@
                 box-shadow: 2px 2px 0 var(--accent-purple);
                 transition: all 0.3s;
                 font-size: 1.2rem;
+                position: relative;
+                right: 0;
+                top: 0;
             }
 
             .hamburger:active {
@@ -556,18 +570,29 @@
                 transform: scale(0.95);
             }
 
+            .hamburger:hover {
+                background: var(--accent-purple);
+                color: white;
+                transform: translate(1px, 1px);
+                box-shadow: 1px 1px 0 var(--dark-outline);
+            }
+
             nav {
                 position: relative;
                 padding: 0.5rem 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
             }
 
             .nav-links {
                 position: fixed;
-                top: 80px;
+                top: 70px;
                 right: -100%;
-                width: 85vw;
-                max-width: 350px;
-                height: calc(100vh - 80px);
+                width: 90vw;
+                max-width: 300px;
+                height: calc(100vh - 70px);
                 background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--secondary-yellow) 100%);
                 flex-direction: column;
                 align-items: center;
@@ -685,21 +710,6 @@
                 max-width: 300px;
             }
 
-            .dark-mode-toggle {
-                top: 15px;
-                right: 15px;
-                width: 50px;
-                height: 25px;
-            }
-
-            .dark-mode-toggle::before {
-                font-size: 14px;
-                left: 3px;
-            }
-
-            .dark-mode-toggle.active::before {
-                left: 28px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -759,21 +769,6 @@
                 font-size: 1rem;
             }
 
-            .dark-mode-toggle {
-                width: 45px;
-                height: 22px;
-                top: 10px;
-                right: 10px;
-            }
-
-            .dark-mode-toggle::before {
-                font-size: 12px;
-                left: 2px;
-            }
-
-            .dark-mode-toggle.active::before {
-                left: 25px;
-            }
         }
 
         .section-fade {
@@ -1038,6 +1033,30 @@
             color: #ffd700;
         }
 
+        /* Dark mode mobile navigation improvements */
+        @media (max-width: 768px) {
+            body.dark-mode .nav-links {
+                background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+                border-color: #444444;
+            }
+
+            body.dark-mode .hamburger {
+                background: #2a2a2a;
+                color: #ffffff;
+                border-color: #444444;
+            }
+
+            body.dark-mode .hamburger:hover {
+                background: #ffd700;
+                color: #1a1a1a;
+            }
+
+            body.dark-mode .hamburger:active {
+                background: #ffed4e;
+                color: #1a1a1a;
+            }
+        }
+
         body.dark-mode .logo {
             color: #ffffff;
         }
@@ -1063,13 +1082,18 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            opacity: 1;
+            visibility: visible;
         }
 
         .loading.hidden {
-            opacity: 0;
-            pointer-events: none;
-            visibility: hidden;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+            z-index: -1 !important;
+            transform: scale(0.8);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .loading-spinner {

@@ -167,6 +167,38 @@ if (darkModeToggle) {
     });
 }
 
+// Mobile dark mode alternative - double tap on logo to toggle dark mode
+const logo = document.querySelector('.logo');
+if (logo && window.innerWidth <= 768) {
+    let tapCount = 0;
+    let tapTimer = null;
+    
+    logo.addEventListener('click', () => {
+        tapCount++;
+        
+        if (tapCount === 1) {
+            tapTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 300);
+        } else if (tapCount === 2) {
+            clearTimeout(tapTimer);
+            tapCount = 0;
+            
+            // Toggle dark mode
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            
+            // Show feedback
+            const originalText = logo.textContent;
+            logo.textContent = isDark ? '🌙 Dark Mode' : '☀️ Light Mode';
+            setTimeout(() => {
+                logo.textContent = originalText;
+            }, 1500);
+        }
+    });
+}
+
 // Scroll indicator
 const scrollIndicator = document.getElementById('scrollIndicator');
 if (scrollIndicator) {
@@ -181,35 +213,60 @@ if (scrollIndicator) {
 // Loading screen
 const loading = document.getElementById('loading');
 if (loading) {
-    // Hide loading screen immediately when page loads
+    let loadingHidden = false;
+    
+    // Add loading-active class to body initially
+    document.body.classList.add('loading-active');
+    
+    const hideLoading = () => {
+        if (!loadingHidden && loading) {
+            loadingHidden = true;
+            loading.classList.add('hidden');
+            
+            // Remove loading-active class from body
+            document.body.classList.remove('loading-active');
+            
+            // Remove from DOM after transition completes
+            setTimeout(() => {
+                if (loading && loading.parentNode) {
+                    loading.parentNode.removeChild(loading);
+                }
+            }, 800); // Match CSS transition duration
+        }
+    };
+    
+    // Hide loading screen when page is fully loaded
     window.addEventListener('load', () => {
-        loading.classList.add('hidden');
-        setTimeout(() => {
-            loading.style.display = 'none';
-        }, 500);
+        setTimeout(hideLoading, 300); // Small delay for better UX
     });
     
-    // Also hide loading screen after DOM is ready (backup)
+    // Backup: Hide loading screen after DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
-            if (loading && !loading.classList.contains('hidden')) {
-                loading.classList.add('hidden');
-                setTimeout(() => {
-                    loading.style.display = 'none';
-                }, 500);
+            if (!loadingHidden) {
+                hideLoading();
             }
-        }, 1000);
+        }, 1500);
     });
     
-    // Force hide loading screen after 3 seconds (emergency fallback)
+    // Emergency fallback: Force hide after 4 seconds
     setTimeout(() => {
-        if (loading && !loading.classList.contains('hidden')) {
-            loading.classList.add('hidden');
-            setTimeout(() => {
-                loading.style.display = 'none';
-            }, 500);
+        if (!loadingHidden) {
+            hideLoading();
         }
-    }, 3000);
+    }, 4000);
+    
+    // Hide loading screen on first user interaction (click/touch)
+    const hideOnInteraction = () => {
+        if (!loadingHidden) {
+            hideLoading();
+            document.removeEventListener('click', hideOnInteraction);
+            document.removeEventListener('touchstart', hideOnInteraction);
+        }
+    };
+    
+    document.addEventListener('click', hideOnInteraction);
+    document.addEventListener('touchstart', hideOnInteraction);
 }
 
 // Initialize everything when DOM is ready
@@ -456,14 +513,30 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('scroll', animateElements);
     window.addEventListener('load', animateElements);
 
-    // Add parallax effect to hero section
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const hero = document.querySelector('.hero');
-        if (hero) {
-            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-        }
-    });
+    // Add parallax effect to hero image only (avoid transforming the whole .hero section
+    // because it conflicts with the .section-fade translateY used for fade animations).
+    const heroImage = document.querySelector('.hero-image');
+    if (heroImage) {
+        let lastKnownScrollY = 0;
+        let ticking = false;
+
+        const updateParallax = () => {
+            const scrolled = lastKnownScrollY;
+            // small translate for parallax (image moves slower than page)
+            const translate = Math.max(0, scrolled * 0.15);
+            // Use transform on the inner image wrapper to avoid interfering with section transforms
+            heroImage.style.transform = `translateY(${translate}px)`;
+            ticking = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            lastKnownScrollY = window.pageYOffset;
+            if (!ticking) {
+                window.requestAnimationFrame(updateParallax);
+                ticking = true;
+            }
+        });
+    }
 
     // Mobile touch interactions
     let touchStartY = 0;
