@@ -14,10 +14,10 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Basic diagnostics for MONGO_URI (no credentials)
+// Parse URI for diagnostics
 const parseMongoUri = (uri) => {
   try {
-    const match = uri.match(/^mongodb\+srv:\/\/[^@]+@([^/]+)\/(.*?)\?/);
+    const match = uri.match(/^mongodb\+srv:\/\/[^@]+@([^/]+)\/([^?]+)?/);
     if (!match) return { host: "unknown", db: "unknown" };
     const host = match[1];
     const db = match[2] || "";
@@ -29,7 +29,7 @@ const parseMongoUri = (uri) => {
 const mongoDiag = parseMongoUri(process.env.MONGO_URI || "");
 console.log("ℹ️ Using Mongo host:", mongoDiag.host, "db:", mongoDiag.db || "<none>");
 
-// MongoDB
+// MongoDB connect
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -39,15 +39,12 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Error:", err));
 
-// Extra Mongo connection event logs
 const mongoConn = mongoose.connection;
 mongoConn.on("connected", () => console.log("ℹ️ Mongo event: connected"));
 mongoConn.on("disconnected", () => console.log("ℹ️ Mongo event: disconnected"));
 mongoConn.on("error", (e) => console.error("ℹ️ Mongo event: error", e));
 
-// Contact model is loaded from ./models/contact
-
-// Nodemailer setup (Gmail SMTP)
+// Nodemailer setup
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -58,9 +55,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verify transporter once at boot to surface auth/network issues early
+// Verify transporter
 let mailTransporterReady = false;
-transporter.verify((error, success) => {
+transporter.verify((error) => {
   if (error) {
     console.error("❌ Mail transporter error:", error);
   } else {
@@ -72,7 +69,6 @@ transporter.verify((error, success) => {
 // Routes
 app.post("/contact", async (req, res) => {
   try {
-    // Return early if DB is not connected to avoid buffering timeouts
     if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({
         success: false,
@@ -82,11 +78,11 @@ app.post("/contact", async (req, res) => {
 
     const { name, email, subject, message } = req.body;
 
-    // 1. Simpan ke database
+    // Save to MongoDB
     const newContact = new Contact({ name, email, subject, message });
     await newContact.save();
 
-    // 2. Kirim email (jika gagal, tetap balas sukses agar UX tidak terblokir)
+    // Send email
     try {
       await transporter.sendMail({
         from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
@@ -101,10 +97,10 @@ Subject: ${subject}
 Message: ${message}
         `,
       });
-      return res.json({ success: true, msg: "Message saved & sent to email!" });
+      return res.json({ success: true, msg: "Message saved & email sent!" });
     } catch (mailErr) {
       console.error("❌ Error sending email:", mailErr);
-      return res.json({ success: true, msg: "Message saved. Email delivery failed, check logs." });
+      return res.json({ success: true, msg: "Message saved. Email failed." });
     }
   } catch (err) {
     console.error("❌ Error handling contact:", err);
@@ -112,7 +108,7 @@ Message: ${message}
   }
 });
 
-// Healthcheck endpoint for quick diagnostics
+// Healthcheck
 app.get("/health", (req, res) => {
   const mongoStates = {
     0: "disconnected",

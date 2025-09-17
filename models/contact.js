@@ -8,5 +8,4 @@ const contactSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
 });
 
-module.exports =
-  mongoose.models.Contact || mongoose.model("Contact", contactSchema);
+module.exports = mongoose.models.Contact || mongoose.model("Contact", contactSchema, "contacts");
