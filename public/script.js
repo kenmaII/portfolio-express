@@ -539,17 +539,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Mobile touch interactions
+    // NOTE: disable auto-scroll swipe behavior on small screens (<=768px)
+    // to keep scrolling manual and avoid interference with native scrolling.
+    const SWIPE_MIN_WIDTH = 769; // only enable swipe auto-scroll on widths >= 769px
     let touchStartY = 0;
     let touchEndY = 0;
 
-    document.addEventListener('touchstart', (e) => {
-        touchStartY = e.changedTouches[0].screenY;
-    });
+    if (window.innerWidth >= SWIPE_MIN_WIDTH) {
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        });
 
-    document.addEventListener('touchend', (e) => {
-        touchEndY = e.changedTouches[0].screenY;
-        handleSwipe();
-    });
+        document.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        });
+    }
 
     const handleSwipe = () => {
         const swipeThreshold = 50;
