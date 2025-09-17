@@ -308,40 +308,127 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Add mouse follower effect (desktop only)
+    // Add enhanced mouse trail effect (desktop only)
     if (window.innerWidth > 768) {
+        // Create trail particles
+        const trailParticles = [];
+        const maxTrailLength = 15;
+        
+        const createTrailParticle = (x, y, color, size = 8) => {
+            const particle = document.createElement('div');
+            particle.className = 'trail-particle';
+            particle.style.cssText = `
+                position: fixed;
+                width: ${size}px;
+                height: ${size}px;
+                background: ${color};
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9998;
+                left: ${x}px;
+                top: ${y}px;
+                opacity: 0.8;
+                box-shadow: 0 0 10px ${color};
+            `;
+            document.body.appendChild(particle);
+            
+            // Animate particle
+            const animation = particle.animate([
+                { 
+                    transform: 'scale(1) translate(0, 0)', 
+                    opacity: 0.8 
+                },
+                { 
+                    transform: 'scale(0.3) translate(0, -20px)', 
+                    opacity: 0 
+                }
+            ], {
+                duration: 800,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            });
+            
+            animation.onfinish = () => particle.remove();
+            return particle;
+        };
+
+        // Main cursor follower
         const mouseFollower = document.createElement('div');
         mouseFollower.className = 'mouse-follower';
         mouseFollower.style.cssText = `
             position: fixed;
-            width: 20px;
-            height: 20px;
-            background: radial-gradient(circle, var(--primary-yellow) 0%, transparent 70%);
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, var(--primary-yellow) 0%, var(--accent-purple) 50%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
             z-index: 9999;
-            transition: transform 0.1s ease;
-            opacity: 0.7;
+            transition: transform 0.15s ease;
+            opacity: 0.9;
+            box-shadow: 0 0 20px var(--primary-yellow);
         `;
         document.body.appendChild(mouseFollower);
 
+        let mouseX = 0, mouseY = 0;
+        let lastTrailTime = 0;
+
         document.addEventListener('mousemove', (e) => {
-            mouseFollower.style.left = e.clientX - 10 + 'px';
-            mouseFollower.style.top = e.clientY - 10 + 'px';
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Update main cursor
+            mouseFollower.style.left = mouseX - 12 + 'px';
+            mouseFollower.style.top = mouseY - 12 + 'px';
+            
+            // Create trail particles
+            const now = Date.now();
+            if (now - lastTrailTime > 50) { // Limit trail frequency
+                const colors = [
+                    'var(--primary-yellow)',
+                    'var(--accent-purple)',
+                    'var(--accent-blue)',
+                    'var(--dark-yellow)'
+                ];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                const randomSize = Math.random() * 6 + 4;
+                
+                createTrailParticle(
+                    mouseX + (Math.random() - 0.5) * 20, 
+                    mouseY + (Math.random() - 0.5) * 20, 
+                    randomColor, 
+                    randomSize
+                );
+                
+                lastTrailTime = now;
+            }
         });
 
         // Add interactive cursor effects
         const interactiveElements = document.querySelectorAll('a, button, .portfolio-item, .skill-item');
         interactiveElements.forEach(element => {
             element.addEventListener('mouseenter', () => {
-                mouseFollower.style.transform = 'scale(1.5)';
-                mouseFollower.style.background = 'radial-gradient(circle, var(--accent-purple) 0%, transparent 70%)';
+                mouseFollower.style.transform = 'scale(1.8)';
+                mouseFollower.style.background = 'radial-gradient(circle, var(--accent-purple) 0%, var(--accent-blue) 50%, transparent 70%)';
+                mouseFollower.style.boxShadow = '0 0 30px var(--accent-purple)';
+                
+                // Create burst effect
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const x = mouseX + Math.cos(angle) * 30;
+                    const y = mouseY + Math.sin(angle) * 30;
+                    createTrailParticle(x, y, 'var(--accent-purple)', 6);
+                }
             });
             
             element.addEventListener('mouseleave', () => {
                 mouseFollower.style.transform = 'scale(1)';
-                mouseFollower.style.background = 'radial-gradient(circle, var(--primary-yellow) 0%, transparent 70%)';
+                mouseFollower.style.background = 'radial-gradient(circle, var(--primary-yellow) 0%, var(--accent-purple) 50%, transparent 70%)';
+                mouseFollower.style.boxShadow = '0 0 20px var(--primary-yellow)';
             });
+        });
+
+        // Hide cursor on interactive elements
+        interactiveElements.forEach(element => {
+            element.style.cursor = 'none';
         });
     }
 
