@@ -641,3 +641,224 @@
             opacity: 1;
             transform: translateY(0);
         }
+
+        /* Ripple effect for buttons */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Enhanced button hover effects */
+        .btn, .submit-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover, .submit-btn:hover {
+            transform: translate(2px, 2px) scale(1.05);
+            box-shadow: 3px 3px 0 var(--dark-outline), 0 0 20px rgba(170, 115, 224, 0.3);
+        }
+
+        /* Enhanced portfolio item animations */
+        .portfolio-item {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portfolio-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+            z-index: 1;
+        }
+
+        .portfolio-item:hover::before {
+            left: 100%;
+        }
+
+        /* Skill bars enhanced animation */
+        .progress-bar {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Enhanced social links */
+        .social-link {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .social-link:hover {
+            color: white;
+            z-index: 2;
+        }
+
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 30px;
+            background: var(--dark-outline);
+            border-radius: 15px;
+            border: 3px solid var(--dark-outline);
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode-toggle::before {
+            content: '🌙';
+            position: absolute;
+            top: 50%;
+            left: 5px;
+            transform: translateY(-50%);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode-toggle.active {
+            background: var(--primary-yellow);
+        }
+
+        .dark-mode-toggle.active::before {
+            content: '☀️';
+            left: 35px;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        body.dark-mode .hero {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+        }
+
+        body.dark-mode .about {
+            background-color: #2a2a2a;
+        }
+
+        body.dark-mode .skills {
+            background-color: #333333;
+        }
+
+        body.dark-mode .portfolio {
+            background-color: #2a2a2a;
+        }
+
+        body.dark-mode .contact {
+            background-color: #333333;
+        }
+
+        body.dark-mode .portfolio-item {
+            background-color: #333333;
+        }
+
+        body.dark-mode .skill-item {
+            background-color: #2a2a2a;
+        }
+
+        body.dark-mode .contact-form {
+            background-color: #2a2a2a;
+        }
+
+        /* Loading animation */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-yellow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--dark-outline);
+            border-top: 5px solid var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-purple);
+            transform-origin: left;
+            transform: scaleX(0);
+            z-index: 1000;
+            transition: transform 0.1s ease;
+        }
