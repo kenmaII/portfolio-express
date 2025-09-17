@@ -226,13 +226,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Random size between 30px to 80px (bigger bubbles!)
             const size = Math.random() * 50 + 30;
             const colors = [
-                'var(--accent-purple)', 
-                'var(--accent-blue)', 
-                'var(--primary-yellow)', 
-                'var(--dark-yellow)',
-                'rgba(170, 115, 224, 0.6)',
-                'rgba(73, 198, 229, 0.6)',
-                'rgba(255, 217, 0, 0.6)'
+                'var(--spongebob-blue)', 
+                'var(--spongebob-pink)', 
+                'var(--spongebob-green)', 
+                'var(--spongebob-purple)',
+                'var(--spongebob-yellow)',
+                'var(--spongebob-orange)',
+                'var(--spongebob-white)'
             ];
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             
