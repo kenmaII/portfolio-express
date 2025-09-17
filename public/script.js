@@ -217,40 +217,95 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add ripple effect to buttons
     addRippleEffect();
     
-    // Add floating particles effect (desktop only)
+    // Add floating bubbles effect (desktop only)
     if (window.innerWidth > 768) {
-        const createParticle = () => {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.cssText = `
+        const createBubble = () => {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            // Random size between 30px to 80px (bigger bubbles!)
+            const size = Math.random() * 50 + 30;
+            const colors = [
+                'var(--accent-purple)', 
+                'var(--accent-blue)', 
+                'var(--primary-yellow)', 
+                'var(--dark-yellow)',
+                'rgba(170, 115, 224, 0.6)',
+                'rgba(73, 198, 229, 0.6)',
+                'rgba(255, 217, 0, 0.6)'
+            ];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            bubble.style.cssText = `
                 position: fixed;
-                width: 4px;
-                height: 4px;
-                background: var(--accent-purple);
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), ${randomColor});
                 border-radius: 50%;
                 pointer-events: none;
                 z-index: 1;
-                opacity: 0.6;
+                opacity: 0.7;
+                box-shadow: 
+                    inset -10px -10px 20px rgba(0,0,0,0.1),
+                    0 0 20px rgba(255,255,255,0.3);
+                border: 2px solid rgba(255,255,255,0.4);
             `;
             
-            particle.style.left = Math.random() * window.innerWidth + 'px';
-            particle.style.top = window.innerHeight + 'px';
+            // Random starting position
+            bubble.style.left = Math.random() * (window.innerWidth - size) + 'px';
+            bubble.style.top = window.innerHeight + size + 'px';
             
-            document.body.appendChild(particle);
+            // Random floating motion - more natural bubble movement
+            const floatX = (Math.random() - 0.5) * 150; // More horizontal drift
+            const floatY = -(window.innerHeight + 300); // Float higher
+            const rotation = Math.random() * 1080 - 540; // More rotation
+            const wobble = Math.random() * 20 - 10; // Wobble effect
             
-            const animation = particle.animate([
-                { transform: 'translateY(0px) rotate(0deg)', opacity: 0.6 },
-                { transform: `translateY(-${window.innerHeight + 100}px) rotate(360deg)`, opacity: 0 }
+            document.body.appendChild(bubble);
+            
+            const animation = bubble.animate([
+                { 
+                    transform: `translateY(0px) translateX(0px) rotate(0deg) scale(1)`, 
+                    opacity: 0.7 
+                },
+                { 
+                    transform: `translateY(${floatY * 0.3}px) translateX(${floatX * 0.3}px) rotate(${rotation * 0.3}deg) scale(1.1)`, 
+                    opacity: 0.9 
+                },
+                { 
+                    transform: `translateY(${floatY}px) translateX(${floatX}px) rotate(${rotation}deg) scale(0.2)`, 
+                    opacity: 0 
+                }
             ], {
-                duration: Math.random() * 3000 + 2000,
-                easing: 'linear'
+                duration: Math.random() * 5000 + 4000, // 4-9 seconds for bigger bubbles
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
             });
             
-            animation.onfinish = () => particle.remove();
+            animation.onfinish = () => bubble.remove();
         };
 
-        // Create particles periodically
-        setInterval(createParticle, 300);
+        // Create bubbles periodically
+        setInterval(createBubble, 800); // Slower creation rate for bigger bubbles
+
+        // Add bubble interaction with mouse
+        document.addEventListener('mousemove', (e) => {
+            const bubbles = document.querySelectorAll('.bubble');
+            bubbles.forEach(bubble => {
+                const rect = bubble.getBoundingClientRect();
+                const bubbleX = rect.left + rect.width / 2;
+                const bubbleY = rect.top + rect.height / 2;
+                const distance = Math.sqrt(Math.pow(e.clientX - bubbleX, 2) + Math.pow(e.clientY - bubbleY, 2));
+                
+                if (distance < 100) {
+                    const force = (100 - distance) / 100;
+                    const angle = Math.atan2(e.clientY - bubbleY, e.clientX - bubbleX);
+                    const pushX = Math.cos(angle) * force * 20;
+                    const pushY = Math.sin(angle) * force * 20;
+                    
+                    bubble.style.transform += ` translate(${pushX}px, ${pushY}px)`;
+                }
+            });
+        });
     }
 
     // Add mouse follower effect (desktop only)
