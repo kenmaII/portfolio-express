@@ -8,15 +8,22 @@ const Project = require("./models/project");
 const Settings = require('./models/settings');
 const nodemailer = require("nodemailer");
 const fs = require('fs');
+const os = require('os');
 const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ensure uploads directory exists and serve it
-const uploadsDir = path.join(__dirname, 'public', 'uploads');
-try{ fs.mkdirSync(uploadsDir, { recursive: true }); }catch(e){}
-app.use('/uploads', express.static(uploadsDir));
+// detect serverless environment (Vercel, AWS Lambda, etc.)
+const isServerless = !!process.env.VERCEL || !!process.env.AWS_REGION || !!process.env.LAMBDA_TASK_ROOT;
+// ensure uploads directory exists for local dev; in serverless use os.tmpdir()
+const uploadsDirLocal = path.join(__dirname, 'public', 'uploads');
+const uploadsDir = isServerless ? os.tmpdir() : uploadsDirLocal;
+if (!isServerless) {
+  try { fs.mkdirSync(uploadsDir, { recursive: true }); } catch (e) { /* ignore */ }
+}
+// always serve static `public` (bundled assets); uploads in production/serverless are not persisted
+app.use('/uploads', express.static(uploadsDirLocal));
 const upload = multer({ dest: uploadsDir });
 
 // Global safety: prevent process from exiting on DB DNS glitches; log and continue serving static files.
@@ -37,12 +44,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 // Session (in-memory for demo). For production, use a persistent store.
 // Use Mongo-backed session store when possible (safer for production)
+// create session store only when MONGO_URI is configured
+let sessionStore = undefined;
+if (process.env.MONGO_URI) {
+  sessionStore = MongoStore.create({ mongoUrl: process.env.MONGO_URI, ttl: 14 * 24 * 60 * 60 });
+}
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 1000 * 60 * 60 * 4 },
-  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI, ttl: 14 * 24 * 60 * 60 })
+  store: sessionStore
 }));
 
 // Parse URI for diagnostics
@@ -383,6 +395,11 @@ app.get('/api/auth/me', async (req, res) => {
   res.json({ success: true, user: { username: user.username, role: user.role } });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+// On serverless platforms (Vercel) we should export the app instead of listening on a port.
+if (isServerless) {
+  module.exports = app;
+} else {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });
+}
