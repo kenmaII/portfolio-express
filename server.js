@@ -37,7 +37,8 @@ process.on('unhandledRejection', (reason) => {
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const User = require('./models/user');
-const MongoStore = require('connect-mongo');
+// don't require connect-mongo at top-level. require it lazily only when MONGO_URI is present
+let MongoStore;
 // Middleware
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,7 +48,15 @@ app.use(bodyParser.json());
 // create session store only when MONGO_URI is configured
 let sessionStore = undefined;
 if (process.env.MONGO_URI) {
-  sessionStore = MongoStore.create({ mongoUrl: process.env.MONGO_URI, ttl: 14 * 24 * 60 * 60 });
+  try {
+    MongoStore = require('connect-mongo');
+    sessionStore = MongoStore.create({ mongoUrl: process.env.MONGO_URI, ttl: 14 * 24 * 60 * 60 });
+  } catch (e) {
+    // If requiring connect-mongo fails in the serverless build (packaging issues),
+    // continue without a persistent session store to avoid crashing the function.
+    console.warn('⚠️ connect-mongo require failed; session store disabled:', e && e.message ? e.message : e);
+    sessionStore = undefined;
+  }
 }
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret',
