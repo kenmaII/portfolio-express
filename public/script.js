@@ -6,6 +6,8 @@ if (hamburger && navLinks) {
     hamburger.addEventListener('click', () => {
         navLinks.classList.toggle('active');
         hamburger.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
+    // Ensure desktop toggle visibility updates when mobile nav opens/closes
+    if (typeof enforceToggleVisibility === 'function') enforceToggleVisibility();
         
         // Add bounce animation to hamburger
         hamburger.style.transform = 'scale(0.9)';
@@ -14,6 +16,99 @@ if (hamburger && navLinks) {
         }, 150);
     });
 }
+
+/* PUBLIC ADMIN INTEGRATION: show admin controls in header and render projects dynamically */
+(function(){
+    const headerAdmin = document.getElementById('publicAdminControls');
+    const portfolioContainer = document.querySelector('.portfolio-container');
+    let PUBLIC_USER = null;
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+    async function checkPublicAuth(){
+        // If the visitor explicitly chose to browse as a guest, honor that locally
+        const forcedRole = localStorage.getItem('siteRole');
+        if (forcedRole === 'guest') {
+            PUBLIC_USER = null;
+            renderHeader();
+            loadAndRenderProjects();
+            return;
+        }
+
+        try{
+            // include credentials so we correctly detect an existing server session
+            const r = await fetch('/api/auth/me', { credentials: 'include' });
+            const d = await r.json();
+            PUBLIC_USER = d && d.user ? d.user : null;
+            renderHeader();
+            loadAndRenderProjects();
+        }catch(e){ PUBLIC_USER = null; renderHeader(); loadAndRenderProjects(); }
+    }
+
+    function renderHeader(){
+        if(!headerAdmin) return;
+    // Hide admin controls on public site navigation to avoid showing login/logout
+    headerAdmin.style.display = 'none';
+    }
+
+    async function loadAndRenderProjects(){
+        if(!portfolioContainer) return;
+        portfolioContainer.innerHTML = '<div class="loading">Loading projects...</div>';
+        try{
+            const res = await fetch('/api/projects');
+            const data = await res.json();
+            if(!data.success || !Array.isArray(data.projects) || data.projects.length === 0){
+                portfolioContainer.innerHTML = '<div class="empty">No projects yet.</div>';
+                return;
+            }
+            portfolioContainer.innerHTML = '';
+            data.projects.forEach(p=>{
+                const card = document.createElement('div'); card.className='portfolio-item';
+                const imgSrc = p.imageUrl || '';
+                const imgHtml = imgSrc ? `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.title||'Project image')}"/>` : `<div class="placeholder">🎨</div>`;
+                card.innerHTML = `
+                    <div class="portfolio-image">${imgHtml}</div>
+                    <div class="portfolio-info">
+                        <h3>${escapeHtml(p.title)}</h3>
+                        <p>${escapeHtml(p.description||'')}</p>
+                        <div class="portfolio-tags">${(p.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+                    </div>`;
+                // only show admin controls for authenticated admin users
+                // also honor an explicit guest override in localStorage
+                const forcedRole = localStorage.getItem('siteRole');
+                if (forcedRole === 'guest') {
+                    // do not render admin controls when the visitor chose guest mode
+                } else if (PUBLIC_USER && PUBLIC_USER.role === 'admin'){
+                    const ctrl = document.createElement('div'); ctrl.style.marginTop = '.5rem';
+                    const editBtn = document.createElement('button'); editBtn.className='btn edit-inline'; editBtn.textContent='Edit'; editBtn.dataset.id = p._id;
+                    const delBtn = document.createElement('button'); delBtn.className='btn delete-inline'; delBtn.textContent='Delete'; delBtn.style.background='#ff6b6b'; delBtn.dataset.id = p._id;
+                    ctrl.appendChild(editBtn); ctrl.appendChild(delBtn);
+                    card.querySelector('.portfolio-info').appendChild(ctrl);
+                }
+                portfolioContainer.appendChild(card);
+            });
+
+            // Inline delete handlers
+        document.querySelectorAll('.delete-inline').forEach(b=>b.addEventListener('click', async (e)=>{
+                if(!confirm('Delete this project?')) return;
+                const id = e.currentTarget.getAttribute('data-id');
+                try{
+            const r = await fetch('/api/projects/'+id,{method:'DELETE', credentials: 'include'});
+                    if(r.status===401){ siteAlert.show('Unauthorized','error'); return; }
+                    const d = await r.json(); if(d.success) siteAlert.show('Deleted');
+                }catch(err){ siteAlert.show('Delete failed','error'); }
+                loadAndRenderProjects();
+            }));
+        }catch(err){
+            portfolioContainer.innerHTML = '<div class="error">Failed to load projects</div>';
+            console.warn('load projects err', err);
+        }
+    }
+
+    // expose functions so role modal can control initial flow
+    window.checkPublicAuth = checkPublicAuth;
+    window.loadAndRenderProjects = loadAndRenderProjects;
+})();
 
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -36,7 +131,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Animate progress bars on scroll
+    // Animate progress bars on scroll
 const animateOnScroll = () => {
     const skillItems = document.querySelectorAll('.skill-item');
     
@@ -45,7 +140,11 @@ const animateOnScroll = () => {
         if (rect.top <= window.innerHeight - 100) {
             const progressBar = item.querySelector('.progress-bar');
             if (progressBar) {
-                progressBar.style.width = progressBar.textContent;
+                // prefer data-value (number) if present
+                const val = progressBar.dataset.value !== undefined ? Number(progressBar.dataset.value) : null;
+                const pct = (val || Number((progressBar.textContent||'').replace('%','')) || 0);
+                progressBar.style.width = pct + '%';
+                progressBar.textContent = pct + '%';
             }
         }
     });
@@ -81,6 +180,27 @@ if (bgMusic) {
     };
     document.addEventListener('click', playMusic);
 }
+
+// Small shared alert banner for public pages
+const siteAlert = (() => {
+    let el = document.getElementById('siteAlert');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'siteAlert';
+        el.setAttribute('role','status');
+        el.style.cssText = 'position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:3000;display:none;padding:.6rem 1rem;border-radius:8px;border:2px solid #333;background:rgba(255,255,255,0.95)';
+        document.body.appendChild(el);
+    }
+    return {
+        show: (msg, type='ok') => {
+            el.textContent = msg;
+            el.style.display = 'block';
+            el.style.borderColor = type === 'error' ? '#c33' : type === 'warn' ? '#d48' : '#3a3';
+            el.style.background = type === 'error' ? 'rgba(255,220,220,0.95)' : type === 'warn' ? 'rgba(255,245,220,0.95)' : 'rgba(220,255,220,0.95)';
+            setTimeout(()=> el.style.display = 'none', 3000);
+        }
+    };
+})();
 
 // Enhanced typing effect for hero text
 const typingText = document.querySelector('.typing-text');
@@ -145,27 +265,22 @@ const addRippleEffect = () => {
     });
 };
 
-// Dark mode toggle functionality
-const darkModeToggle = document.getElementById('darkModeToggle');
+// Dark mode removed per request. No-op placeholder to keep references safe.
 const body = document.body;
 
-if (darkModeToggle) {
-    // Check for saved dark mode preference or default to light mode
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    if (currentTheme === 'dark') {
-        body.classList.add('dark-mode');
-        darkModeToggle.classList.add('active');
+// Defensive: ensure desktop floating toggle is hidden on mobile widths (in case CSS is overridden)
+const enforceToggleVisibility = () => {
+    const desktopToggle = document.getElementById('darkModeToggle');
+    if (!desktopToggle) return;
+    if (window.innerWidth <= 768) {
+        desktopToggle.style.display = 'none';
+    } else {
+        desktopToggle.style.display = '';
     }
+};
 
-    darkModeToggle.addEventListener('click', () => {
-        body.classList.toggle('dark-mode');
-        darkModeToggle.classList.toggle('active');
-        
-        // Save the preference
-        const isDark = body.classList.contains('dark-mode');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
-}
+window.addEventListener('resize', enforceToggleVisibility);
+enforceToggleVisibility();
 
 // Mobile dark mode alternative - double tap on logo to toggle dark mode
 const logo = document.querySelector('.logo');
@@ -189,12 +304,9 @@ if (logo && window.innerWidth <= 768) {
             const isDark = body.classList.contains('dark-mode');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             
-            // Show feedback
-            const originalText = logo.textContent;
-            logo.textContent = isDark ? '🌙 Dark Mode' : '☀️ Light Mode';
-            setTimeout(() => {
-                logo.textContent = originalText;
-            }, 1500);
+                // Show short visual feedback by toggling an 'active' class briefly
+                logo.classList.add('flash-theme');
+                setTimeout(() => logo.classList.remove('flash-theme'), 800);
         }
     });
 }
@@ -210,63 +322,24 @@ if (scrollIndicator) {
     });
 }
 
-// Loading screen
-const loading = document.getElementById('loading');
-if (loading) {
-    let loadingHidden = false;
-    
-    // Add loading-active class to body initially
-    document.body.classList.add('loading-active');
-    
-    const hideLoading = () => {
-        if (!loadingHidden && loading) {
-            loadingHidden = true;
-            loading.classList.add('hidden');
-            
-            // Remove loading-active class from body
-            document.body.classList.remove('loading-active');
-            
-            // Remove from DOM after transition completes
-            setTimeout(() => {
-                if (loading && loading.parentNode) {
-                    loading.parentNode.removeChild(loading);
-                }
-            }, 800); // Match CSS transition duration
-        }
-    };
-    
-    // Hide loading screen when page is fully loaded
-    window.addEventListener('load', () => {
-        setTimeout(hideLoading, 300); // Small delay for better UX
+// Role modal handling: Guest or Admin
+const roleModal = document.getElementById('roleModal');
+if (roleModal) {
+    const roleGuest = document.getElementById('roleGuest');
+    const roleAdmin = document.getElementById('roleAdmin');
+
+    roleGuest.addEventListener('click', () => {
+        roleModal.style.display = 'none';
+    // Remember the visitor wants to browse as a guest even if an admin session exists
+    try{ localStorage.setItem('siteRole','guest'); }catch(e){}
+    // Guest: render projects immediately (public admin integration handles this)
+    if (typeof checkPublicAuth === 'function') checkPublicAuth();
     });
-    
-    // Backup: Hide loading screen after DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (!loadingHidden) {
-                hideLoading();
-            }
-        }, 1500);
+
+    roleAdmin.addEventListener('click', () => {
+        // Redirect to admin editor/login page
+        window.location.href = '/admin.html';
     });
-    
-    // Emergency fallback: Force hide after 4 seconds
-    setTimeout(() => {
-        if (!loadingHidden) {
-            hideLoading();
-        }
-    }, 4000);
-    
-    // Hide loading screen on first user interaction (click/touch)
-    const hideOnInteraction = () => {
-        if (!loadingHidden) {
-            hideLoading();
-            document.removeEventListener('click', hideOnInteraction);
-            document.removeEventListener('touchstart', hideOnInteraction);
-        }
-    };
-    
-    document.addEventListener('click', hideOnInteraction);
-    document.addEventListener('touchstart', hideOnInteraction);
 }
 
 // Initialize everything when DOM is ready
@@ -589,37 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('touchstart', addHapticFeedback);
     });
     
-    // Create mobile dark-mode toggle inside mobile nav-links for small screens
-    const createMobileDarkToggle = () => {
-        const navLinks = document.querySelector('.nav-links');
-        if (!navLinks) return;
-
-        // Avoid duplicate
-        if (document.querySelector('.dark-mode-toggle-mobile')) return;
-
-        const mobileToggle = document.createElement('div');
-        mobileToggle.className = 'dark-mode-toggle-mobile';
-        mobileToggle.textContent = body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
-
-        mobileToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            const isDark = body.classList.contains('dark-mode');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            mobileToggle.classList.toggle('active', isDark);
-            mobileToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
-        });
-
-        // Reflect initial state
-        if (body.classList.contains('dark-mode')) mobileToggle.classList.add('active');
-
-        navLinks.appendChild(mobileToggle);
-    };
-
-    // Run creation on load and also when nav toggles open (so it's present)
-    createMobileDarkToggle();
-    if (hamburger) {
-        hamburger.addEventListener('click', () => setTimeout(createMobileDarkToggle, 120));
-    }
+    // Dark mode removed; no mobile toggle created.
 });
 
 // Contact form AJAX submit (with external API and error handling)
@@ -637,11 +680,20 @@ if (contactForm) {
         submitBtn.disabled = true;
 
         const formData = {
-            name: e.target.name.value,
-            email: e.target.email.value,
-            subject: e.target.subject.value,
-            message: e.target.message.value,
+            name: e.target.name.value.trim(),
+            email: e.target.email.value.trim(),
+            subject: e.target.subject.value.trim(),
+            message: e.target.message.value.trim(),
         };
+
+        // Basic validation
+        if(!formData.name || !formData.email || !formData.message) {
+            siteAlert.show('Name, email and message are required', 'warn');
+            submitBtn.textContent = originalText;
+            submitBtn.style.opacity = '1';
+            submitBtn.disabled = false;
+            return;
+        }
 
         try {
             const res = await fetch("/contact", {
@@ -679,3 +731,66 @@ if (contactForm) {
         }
     });
 }
+
+// When guest selects role, if no projects are present show hint
+window.loadAndRenderProjects = window.loadAndRenderProjects || function(){
+    // original function is defined in IIFE; if missing, just show nothing
+};
+
+// SSE subscription for live updates (falls back to polling)
+function setupSseUpdates(){
+    if (typeof EventSource === 'undefined') return; // not supported
+    try{
+        const es = new EventSource('/events');
+        es.onmessage = function(e){
+            try{
+                const payload = JSON.parse(e.data);
+                if(payload.event === 'settings.updated'){
+                    // reload settings and re-render
+                    if(typeof loadAndRenderProjects === 'function') loadAndRenderProjects();
+                    // reload settings specifically
+                    fetch('/api/settings').then(r=>r.json()).then(d=>{ if(d.success && typeof window.loadAndApplySettings === 'function') window.loadAndApplySettings(); });
+                }
+                if(payload.event === 'projects.updated'){
+                    if(typeof loadAndRenderProjects === 'function') loadAndRenderProjects();
+                }
+            }catch(e){ console.warn('Invalid SSE payload', e); }
+        };
+        es.onerror = function(){ es.close(); };
+    }catch(e){ console.warn('SSE not available', e); }
+}
+
+// expose a loader hook used by admin script
+window.loadAndApplySettings = window.loadAndApplySettings || async function(){
+    try{
+        // force a fresh fetch and avoid caches
+        const r = await fetch('/api/settings', { cache: 'no-store' });
+        const d = await r.json();
+        if(d.success){
+            const s = d.settings || {};
+            console.log('public: loaded settings', s && s.skills);
+            if(s.profileImage){
+                const heroImg = document.querySelector('.hero-image img');
+                const aboutImg = document.querySelector('.about-image img');
+                if(heroImg) heroImg.src = s.profileImage;
+                if(aboutImg) aboutImg.src = s.profileImage;
+            }
+        // Do not overwrite the skills container because skills are managed manually in index.html.
+        // Apply only profile image and other settings that do not touch manually edited sections.
+        // If you later want to manage skills via admin UI, re-enable replacing the skills-container here.
+        }
+    }catch(e){ console.warn('load settings failed', e); }
+};
+
+// start SSE when DOM ready
+document.addEventListener('DOMContentLoaded', ()=> setupSseUpdates());
+
+// On DOM ready: check auth first, then load settings/projects so admin-only controls are added only for authenticated users
+document.addEventListener('DOMContentLoaded', async ()=>{
+    // run auth check first if available
+    if(typeof checkPublicAuth === 'function'){
+        try{ await checkPublicAuth(); }catch(e){}
+    }
+    if(typeof window.loadAndApplySettings === 'function') await window.loadAndApplySettings();
+    if(typeof loadAndRenderProjects === 'function') await loadAndRenderProjects();
+});

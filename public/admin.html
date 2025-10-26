@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Portfolio</title>
+  <link rel="stylesheet" href="/adminStyle.css">
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="logo">Admin Page</a>
+    <nav class="nav-links"><a href="/">View site</a></nav>
+    <div id="adminStatus" style="margin-left:auto;padding:0 1rem"></div>
+  </header>
+
+  <main class="container">
+    <section id="loginSection" class="card">
+      <h2>Admin Login</h2>
+      <div style="max-width:420px">
+        <input id="a_user" class="input" placeholder="username" />
+        <input id="a_pass" class="input" type="password" placeholder="password" />
+        <div style="margin-top:.6rem"><button id="btnLogin" class="btn">Login</button></div>
+      </div>
+    </section>
+
+    <section id="adminPanel" class="card" style="display:none">
+      <h2>Site Settings</h2>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <label>Profile image (upload)</label>
+          <input id="profileFile" type="file" accept="image/*" class="input" />
+          <button id="uploadProfile" class="btn" style="margin-top:.5rem">Upload Profile Image</button>
+          <div id="profilePreview" style="margin-top:.5rem;width:120px;height:120px;border:4px solid var(--dark-outline);border-radius:8px;overflow:hidden"></div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <label>Skills</label>
+          <div style="padding:.5rem;background:#fff8e1;border-radius:8px;border:1px dashed #ffd700;color:#333">Skills are managed manually via <code>index.html</code>. The admin UI only manages profile image and projects.</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:1rem">Projects</h3>
+      <div id="projectsArea">
+        <div style="margin-bottom:.6rem"><button id="btnNew" class="btn">New Project</button></div>
+        <div id="projectsList"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="siteAlert" aria-live="polite" style="display:none"></div>
+
+  <script src="/adminScript.js"></script>
+</body>
+</html>

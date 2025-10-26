@@ -1,0 +1,6 @@
+Server fix notes:
+- Added express-session and bcrypt to package.json
+- Ran npm install
+- Fixed misplaced session code in server.js
+- Started server with nodemon; Mongo connected, mail transporter ready
+- Next: set SESSION_SECRET in .env and consider persistent session store for production
