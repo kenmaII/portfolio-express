@@ -1236,3 +1236,21 @@
             opacity: 1 !important;
             transition: all 0.3s ease;
         }
+
+        .project-links .icon{
+          display:inline-flex;
+          width:34px;
+          height:34px;
+          align-items:center;
+          justify-content:center;
+          border-radius:8px;
+          background:rgba(0,0,0,0.04);
+          color:var(--dark-outline);
+          text-decoration:none;
+          transition:transform .15s ease, box-shadow .15s ease;
+          padding:4px;
+        }
+        .project-links .icon:hover{ transform:translateY(-3px); box-shadow:0 6px 18px rgba(0,0,0,0.08); }
+        .project-links .icon svg{ width:18px; height:18px; display:block; }
+        /* style smaller "Open project" link */
+        .project-links .project-visible-link{ font-weight:700; font-size:.95rem; }

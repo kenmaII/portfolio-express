@@ -6,6 +6,37 @@
     <title>Kenma Portfolio</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
+
+    <!-- added: larger social icons + spacing for the Contact area -->
+    <style>
+      /* bigger social icons under Contact */
+      .social-links .project-links { gap: 40px; }
+
+      .social-links .project-links .icon{
+        width: 56px;
+        height: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(0,0,0,0.04);
+        color: var(--dark-outline);
+        text-decoration: none;
+        transition: transform .15s ease, box-shadow .15s ease;
+        padding: 6px;
+      }
+
+      .social-links .project-links .icon svg{
+        width: 26px;
+        height: 26px;
+        display: block;
+      }
+
+      .social-links .project-links .icon:hover{
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+      }
+    </style>
 </head>
 <body>
         <!-- Role choice modal: Guest or Admin -->
@@ -48,8 +79,8 @@
         <div class="hero-content">
             <div class="hero-text">
                 <h1>Hi! I'm <br> Ken Majas Islamy</h1>
-                <h2>Making digital art with yellow vibes!</h2>
-                <p class="typing-text">I create fun, colorful designs that bring joy and personality to the web.</p>
+                <h2>Fotografer, Frontend Developer</h2>
+                <p class="typing-text">Seorang Fotografer dan Frontend Developer serta UI/UX Designer.</p>
                 <a href="#portfolio" class="btn">See My Work</a>
             </div>
             <div class="hero-image">
@@ -64,10 +95,10 @@
                 <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/085ec538-80dc-4694-943c-e1806f28a024.png" alt="Illustrated avatar doing various creative activities with digital art tools, surrounded by paint splashes and cartoon elements" />
             </div>
             <div class="about-text">
-                <h2>About Me & My Cartoon World</h2>
-                <p>Welcome to my colorful universe! I'm a digital artist specializing in cartoon-style illustrations and designs. My work combines playful characters with vibrant colors, focusing primarily on sunny yellow tones that bring warmth and happiness.</p>
-                <p>With over 5 years of experience in the digital art field, I've developed a unique style that blends classic cartoon aesthetics with modern digital techniques. My journey began when I first picked up a drawing tablet, and I haven't looked back since!</p>
-                <p>When I'm not creating digital art, you can find me teaching cartoon workshops or exploring new illustration techniques. I believe that art should be accessible and enjoyable for everyone.</p>
+                <h2>About Me</h2>
+                <p>Selamat datang di Portofolioku! Namaku Ken Majas Islamy seorang pelajar SMK dari sekolah SMKN 8 MALANG.</p>
+                <p>Aku adalah seorang Fotografer, Frontend developer & Desainer. Hobiku adalah Bernyanyi, bermain alat musik, membuat lagu, Gym dan tentu saja Fotografi</p>
+                <p>Aku hidup untuk menikmati segala keindahan ciptaan tuhan, mengabadikannya, dan berkreasi tentang segala hal yang berbau seni rupa termasuk Desain dan menjadi frontend developer.</p>
             </div>
         </div>
     </section>
@@ -79,16 +110,16 @@
         <div class="skills-container">
             <div class="skill-item">
                 <div class="skill-title">
-                    <h3>Illustration</h3>
-                    <span>95%</span>
+                    <h3>Mobile developer</h3>
+                    <span>78%</span>
                 </div>
                 <div class="progress-container">
-                    <div class="progress-bar" style="width: 95%">95%</div>
+                    <div class="progress-bar" style="width: 78%">78%</div>
                 </div>
             </div>
             <div class="skill-item">
                 <div class="skill-title">
-                    <h3>Character Design</h3>
+                    <h3>Critical Thinking</h3>
                     <span>90%</span>
                 </div>
                 <div class="progress-container">
@@ -97,7 +128,7 @@
             </div>
             <div class="skill-item">
                 <div class="skill-title">
-                    <h3>Digital Painting</h3>
+                    <h3>Digital design</h3>
                     <span>85%</span>
                 </div>
                 <div class="progress-container">
@@ -106,11 +137,11 @@
             </div>
             <div class="skill-item">
                 <div class="skill-title">
-                    <h3>Animation</h3>
-                    <span>80%</span>
+                    <h3>Photograhpy</h3>
+                    <span>98%</span>
                 </div>
                 <div class="progress-container">
-                    <div class="progress-bar" style="width: 80%">80%</div>
+                    <div class="progress-bar" style="width: 98%">98%</div>
                 </div>
             </div>
             <div class="skill-item">
@@ -124,11 +155,11 @@
             </div>
             <div class="skill-item">
                 <div class="skill-title">
-                    <h3>Storyboarding</h3>
-                    <span>70%</span>
+                    <h3>Backend</h3>
+                    <span>50%</span>
                 </div>
                 <div class="progress-container">
-                    <div class="progress-bar" style="width: 70%">70%</div>
+                    <div class="progress-bar" style="width: 50%">50%</div>
                 </div>
             </div>
         </div>
@@ -138,91 +169,29 @@
         <div class="section-title">
             <h2>My Projects</h2>
         </div>
+
         <div class="portfolio-container">
+            <!-- Example project card — duplicate/replace as needed or let JS populate -->
             <div class="portfolio-item">
                 <div class="portfolio-image">
-                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c9279c97-273a-4a1f-a104-08d5384959ed.png" alt="Cartoon series showing diverse characters in urban settings with exaggerated expressions and bright colors" />
+                    <div class="placeholder">🎨</div>
                 </div>
                 <div class="portfolio-info">
-                    <h3>Urban Character Series</h3>
-                    <p>A collection of city dweller characters, each with unique personalities and colorful designs.</p>
+                    <h3>Example Project</h3>
+                    <p>Short description of the project. Click the links below to open.</p>
                     <div class="portfolio-tags">
-                        <span class="tag">Illustration</span>
-                        <span class="tag">Character Design</span>
+                        <span class="tag">Web</span>
+                        <span class="tag">UI</span>
                     </div>
-                    <a href="#" class="btn">View Project</a>
+
+                    <!-- Links area removed from here; moved under Contact as requested -->
+                    
                 </div>
             </div>
-            <div class="portfolio-item">
-                <div class="portfolio-image">
-                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/293dc15f-c251-445b-b0db-1d452c7e97f0.png" alt="Animated food items with faces and personalities in a diner setting, with comic-style speech bubbles" />
-                </div>
-                <div class="portfolio-info">
-                    <h3>Foodie Friends Animation</h3>
-                    <p>Animated short featuring talking food items in a diner, with rich textures and smooth motion.</p>
-                    <div class="portfolio-tags">
-                        <span class="tag">Animation</span>
-                        <span class="tag">Character Design</span>
-                    </div>
-                    <a href="#" class="btn">View Project</a>
-                </div>
-            </div>
-            <div class="portfolio-item">
-                <div class="portfolio-image">
-                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/26c62d74-d9b0-4f5b-9ece-e94de055deb6.png" alt="Children's book pages with educational cartoon content about space, with planets and rockets" />
-                </div>
-                <div class="portfolio-info">
-                    <h3>Space Explorers Book</h3>
-                    <p>Illustrated children's book about space exploration with educational yet fun cartoon visuals.</p>
-                    <div class="portfolio-tags">
-                        <span class="tag">Book Illustration</span>
-                        <span class="tag">Educational</span>
-                    </div>
-                    <a href="#" class="btn">View Project</a>
-                </div>
-            </div>
-            <div class="portfolio-item">
-                <div class="portfolio-image">
-                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/58b7da2d-4ac6-4e52-b3a0-f0d7892f3f65.png" alt="Mobile app interface with cartoonish UI elements including buttons, icons, and characters" />
-                </div>
-                <div class="portfolio-info">
-                    <h3>Kids Learning App UI</h3>
-                    <p>Colorful mobile interface designed for children's educational app with interactive elements.</p>
-                    <div class="portfolio-tags">
-                        <span class="tag">UI Design</span>
-                        <span class="tag">Mobile</span>
-                    </div>
-                    <a href="#" class="btn">View Project</a>
-                </div>
-            </div>
-            <div class="portfolio-item">
-                <div class="portfolio-image">
-                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/44c5aa93-d3c7-4295-8a2a-dd977e0fe57c.png" alt="Superhero mascot characters with bold colors and dynamic poses for a sports brand" />
-                </div>
-                <div class="portfolio-info">
-                    <h3>Sports Team Mascots</h3>
-                    <p>Dynamic character designs for a sports league's team mascots, each with unique powers.</p>
-                    <div class="portfolio-tags">
-                        <span class="tag">Branding</span>
-                        <span class="tag">Character Design</span>
-                    </div>
-                    <a href="#" class="btn">View Project</a>
-                </div>
-            </div>
-            <div class="portfolio-item">
-                <div class="portfolio-image">
-                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/6a210d41-c5fa-4a91-abf0-88102e4e735f.png" alt="Comic strip panels featuring humorous workplace situations in a brightly colored office setting" />
-                </div>
-                <div class="portfolio-info">
-                    <h3>Office Life Comic</h3>
-                    <p>Weekly comic strip depicting humorous situations in corporate life with exaggerated characters.</p>
-                    <div class="portfolio-tags">
-                        <span class="tag">Comics</span>
-                        <span class="tag">Storytelling</span>
-                    </div>
-                    <a href="#" class="btn">View Project</a>
-                </div>
-            </div>
+
+            <!-- Duplicate above .portfolio-item for other projects.
+                 When using JS to render dynamically, ensure each generated card includes
+                 the same .project-links block with href values set from project.github / project.figma / project.link -->
         </div>
     </section>
 
@@ -253,13 +222,33 @@
                 </form>
                 <p id="responseMsg"></p>
             </div>
-            <div class="social-links">
-                <a href="#" class="social-link">D</a>
-                <a href="#" class="social-link">B</a>
-                <a href="#" class="social-link">I</a>
-                <a href="#" class="social-link">T</a>
+        </div>
+
+        <!-- Social / project icons placed under Contact as requested -->
+        <div class="social-links" style="display:flex;justify-content:center;padding:2rem 0">
+            <div class="project-links" style="display:flex;align-items:center;gap:40px">
+                <!-- GitHub icon -->
+                <a class="icon icon-github" href="https://github.com/nivyanbl/absensi_app" target="_blank" rel="noopener" aria-label="GitHub">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 .5C5.73.5.75 5.48.75 11.75c0 4.96 3.22 9.16 7.69 10.64.56.1.76-.24.76-.53 0-.26-.01-.95-.01-1.86-3.13.68-3.79-1.51-3.79-1.51-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.69.08-.69 1.12.08 1.71 1.15 1.71 1.15 1.01 1.74 2.65 1.24 3.29.95.1-.74.39-1.24.71-1.53-2.5-.28-5.12-1.25-5.12-5.56 0-1.23.44-2.24 1.16-3.03-.12-.28-.5-1.4.11-2.92 0 0 .95-.31 3.12 1.16a10.8 10.8 0 012.84-.38c.96.01 1.93.13 2.84.38 2.17-1.47 3.12-1.16 3.12-1.16.61 1.52.23 2.64.11 2.92.72.79 1.16 1.8 1.16 3.03 0 4.32-2.63 5.28-5.13 5.56.4.35.76 1.04.76 2.1 0 1.52-.01 2.75-.01 3.12 0 .29.2.63.77.52C19.03 20.91 22.25 16.71 22.25 11.75 22.25 5.48 17.27.5 12 .5z"/></svg>
+                </a>
+
+                <!-- Figma icon -->
+                <a class="icon icon-figma" href="https://www.figma.com/design/RCQJDjaKWTshOTVjianY3b/Mockup?node-id=0-1&p=f&t=6CtPLTmJ8Bljof9Y-0" target="_blank" rel="noopener" aria-label="Figma">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/4000/svg"><path d="M12 7.5c0-1.657-1.343-3-3-3s-3 1.343-3 3 1.343 3 3 3 3-1.343 3-3z" fill="currentColor"/><path d="M15 4.5c1.657 0 3 1.343 3 3s-1.343 3-3 3h-3V4.5h3z" fill="currentColor"/><path d="M12 13.5c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z" fill="currentColor"/><path d="M9 10.5h3v6H9c-1.657 0-3-1.343-3-3s1.343-3 3-3z" fill="currentColor"/></svg>
+                </a>
+
+                <!-- Instagram icon -->
+                <a class="icon icon-instagram" href="https://instagram.com/nakaayae" target="_blank" rel="noopener" aria-label="Instagram">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/4000/svg"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 6.2A3.8 3.8 0 1015.8 12 3.8 3.8 0 0012 8.2zm6.4-2.6a1.1 1.1 0 11-1.1 1.1 1.1 1.1 0 011.1-1.1zM12 9.5A2.5 2.5 0 1112 14.5 2.5 2.5 0 0112 9.5z"/></svg>
+                </a>
+
+                <!-- WhatsApp icon -->
+                <a class="icon icon-whatsapp" href="https://wa.me/6285198197547" target="_blank" rel="noopener" aria-label="WhatsApp">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/4000/svg"><path d="M20.52 3.48A11.79 11.79 0 0012 0C5.37 0 .05 5.32.05 11.95c0 2.11.55 4.16 1.6 5.96L0 24l6.36-1.66a11.9 11.9 0 005.64 1.44c6.63 0 11.95-5.32 11.95-11.95 0-3.2-1.23-6.2-3.43-8.35zM12 21.6c-1.82 0-3.6-.48-5.16-1.38l-.37-.22L4.2 20.1l1.03-2.27-.24-.37A8.6 8.6 0 013.35 11.95c0-4.76 3.88-8.64 8.65-8.64 4.76 0 8.64 3.88 8.64 8.64S16.76 21.6 12 21.6zM15.04 14.9c-.26-.13-1.53-.76-1.77-.85-.24-.09-.41-.13-.58.13-.17.26-.68.85-.83 1.02-.15.17-.31.19-.57.06-.26-.13-1.1-.4-2.09-1.29-.77-.69-1.28-1.54-1.43-1.8-.15-.26-.02-.4.11-.53.12-.12.26-.31.39-.46.13-.15.17-.26.26-.43.09-.17.05-.32-.02-.45-.07-.13-.58-1.39-.8-1.9-.21-.5-.43-.43-.58-.44l-.5-.01c-.17 0-.44.06-.67.32-.24.26-.93.91-.93 2.22 0 1.3.95 2.56 1.08 2.74.13.19 1.87 2.94 4.54 4.01 3.07 1.22 3.07.81 3.62.76.55-.05 1.77-.72 2.03-1.43.26-.71.26-1.32.18-1.43-.08-.11-.24-.17-.5-.3z"/></svg>
+                </a>
             </div>
         </div>
+
     </section>
 
     <footer>

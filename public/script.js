@@ -66,27 +66,37 @@ if (hamburger && navLinks) {
                 const card = document.createElement('div'); card.className='portfolio-item';
                 const imgSrc = p.imageUrl || '';
                 const imgHtml = imgSrc ? `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.title||'Project image')}"/>` : `<div class="placeholder">🎨</div>`;
-                card.innerHTML = `
+                const visibleLink = p.link ? String(p.link).trim() : '';
+                const visibleLinkHtml = visibleLink ? `<div style="margin-top:.4rem"><a class="project-visible-link" href="${escapeHtml(visibleLink)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">Open project</a></div>` : '';
+
+                const content = `
                     <div class="portfolio-image">${imgHtml}</div>
                     <div class="portfolio-info">
                         <h3>${escapeHtml(p.title)}</h3>
                         <p>${escapeHtml(p.description||'')}</p>
                         <div class="portfolio-tags">${(p.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+                        ${visibleLinkHtml}
                     </div>`;
-                // only show admin controls for authenticated admin users
-                // also honor an explicit guest override in localStorage
-                const forcedRole = localStorage.getItem('siteRole');
-                if (forcedRole === 'guest') {
-                    // do not render admin controls when the visitor chose guest mode
-                } else if (PUBLIC_USER && PUBLIC_USER.role === 'admin'){
+
+                // Always render content; visibleLinkHtml contains the clickable anchor if present
+                card.innerHTML = content;
+ 
+                 // only show admin controls for authenticated admin users
+                 // also honor an explicit guest override in localStorage
+                 const forcedRole = localStorage.getItem('siteRole');
+                 if (forcedRole === 'guest') {
+                     // do not render admin controls when the visitor chose guest mode
+                 } else if (PUBLIC_USER && PUBLIC_USER.role === 'admin'){
+                    // place admin controls outside the link wrapper so clicks on them don't trigger navigation
                     const ctrl = document.createElement('div'); ctrl.style.marginTop = '.5rem';
                     const editBtn = document.createElement('button'); editBtn.className='btn edit-inline'; editBtn.textContent='Edit'; editBtn.dataset.id = p._id;
                     const delBtn = document.createElement('button'); delBtn.className='btn delete-inline'; delBtn.textContent='Delete'; delBtn.style.background='#ff6b6b'; delBtn.dataset.id = p._id;
                     ctrl.appendChild(editBtn); ctrl.appendChild(delBtn);
-                    card.querySelector('.portfolio-info').appendChild(ctrl);
-                }
-                portfolioContainer.appendChild(card);
-            });
+                    // append admin controls to card (outside anchor). If there is an anchor wrapper, append after it.
+                    card.appendChild(ctrl);
+                 }
+                 portfolioContainer.appendChild(card);
+             });
 
             // Inline delete handlers
         document.querySelectorAll('.delete-inline').forEach(b=>b.addEventListener('click', async (e)=>{
@@ -568,7 +578,6 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.forEach(element => {
             const rect = element.getBoundingClientRect();
             const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-            
             if (isVisible) {
                 element.style.opacity = '1';
                 element.style.transform = 'translateY(0)';
@@ -794,3 +803,5 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     if(typeof window.loadAndApplySettings === 'function') await window.loadAndApplySettings();
     if(typeof loadAndRenderProjects === 'function') await loadAndRenderProjects();
 });
+
+// Note: card-level click-to-open removed. Links are shown as visible anchors inside each card (see loadAndRenderProjects).
