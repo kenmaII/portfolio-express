@@ -8,3 +8,7 @@ Setup : 1
     EMAIL_PASS=zhwg vfnx otur xzeb
 4. Buka terminal lalu ketik "npm install" dan enter
 5. terakhir ketik npm run dev dan enter
+
+Username + Password Page Admin:
+Kenma
+laliaku2912
